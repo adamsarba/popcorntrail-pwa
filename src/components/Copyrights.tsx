@@ -1,15 +1,12 @@
-import { Popcorn } from 'lucide-react'
-// import { usePWA } from '../context/PWAContext'
+import { Popcorn } from 'lucide-react';
+import packageJson from '../../package.json'; // Adjust the path if necessary
 
 export function Copyrights() {
-  // const isPWA = usePWA();
-  
   return (
     <footer className="text-center text-xs text-neutral-600 space-y-1 !my-4">
-      <Popcorn className="size-[1em] mx-auto text-3xl  mb-2 text-neutral-600" strokeWidth={1.5} />
+      <Popcorn className="size-[1em] mx-auto text-3xl mb-2 text-neutral-600" strokeWidth={1.5} />
       <p className="flex items-center justify-center gap-1">
-        {/* {window.location.pathname === '/' && ( <Popcorn className="size-[1.15em]" /> )} */}
-        PopcornTrail 0.0.3
+        PopcornTrail {packageJson.version}
       </p>
       <p>
         Copyrights &copy; 2024 <a href="https://github.com/adamsarba" target="_blank">Adam Sarba</a>
