@@ -6,7 +6,7 @@ export function Copyrights() {
     <footer className="text-center text-xs text-neutral-600 space-y-1 !my-4">
       <Popcorn className="size-[1em] mx-auto text-3xl mb-2 text-neutral-600" strokeWidth={1.5} />
       <p className="flex items-center justify-center gap-1">
-        PopcornTrail {packageJson.version}
+        PopcornTrail {packageJson.version} (beta)
       </p>
       <p>
         Copyrights &copy; 2024 <a href="https://github.com/adamsarba" target="_blank">Adam Sarba</a>
