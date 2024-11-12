@@ -1,68 +1,79 @@
-import { useEffect, useState } from 'react'
-import { TopBar } from '../components/TopBar'
-import { SearchBar } from '../components/SearchBar'
-import { searchMovies } from '../services/tmdbService'
-import { Movie } from '../types/Movie'
-import { MovieCard } from '../components/MovieCard'
-import { getUserData, initializeUser } from '../services/userService';
-import { ListCard } from '../components/ListCard'
-import { ListContainer } from '../components/ListContainer'
-import { ListItem } from '../components/ListItem'
-import { BottomBar } from '../components/BottomBar'
-import PWAPrompt from 'react-ios-pwa-prompt'
-import { motion, AnimatePresence } from 'framer-motion'
-import { NewListCard } from '../components/NewListCard'
-import { usePWA } from '../context/PWAContext'
-import { Check, Calendar, Star, TrendingUp, List, Eye, Tv, Plus, Skull, ChevronDown, } from 'lucide-react' // Clapperboard, UserRound
+import { useEffect, useState } from "react";
+import { TopBar } from "../components/TopBar";
+import { SearchBar } from "../components/SearchBar";
+import { searchMovies } from "../services/tmdbService";
+import { Movie } from "../types/Movie";
+import { MovieCard } from "../components/MovieCard";
+import { getUserData, initializeUser } from "../services/userService";
+import { ListCard } from "../components/ListCard";
+import { ListContainer } from "../components/ListContainer";
+import { ListItem } from "../components/ListItem";
+import { BottomBar } from "../components/BottomBar";
+import PWAPrompt from "react-ios-pwa-prompt";
+import { motion, AnimatePresence } from "framer-motion";
+import { NewListCard } from "../components/NewListCard";
+import { usePWA } from "../context/PWAContext";
+import {
+  Check,
+  Calendar,
+  Star,
+  TrendingUp,
+  List,
+  Eye,
+  Tv,
+  Plus,
+  Skull,
+  ChevronDown,
+} from "lucide-react"; // Clapperboard, UserRound
 
 const defaultLists = [
-  { 
+  {
     title: "Upcoming",
     icon: <Calendar className="size-[1em]" />,
     iconBg: "bg-red",
     count: 0,
-    listLink: true
+    listLink: true,
   },
-  { 
+  {
     title: "Watchlist",
     icon: <List className="size-[1em]" strokeWidth={2.5} />,
     iconBg: "bg-blue",
     count: 0,
-    listLink: true
+    listLink: true,
   },
-  { 
+  {
     title: "Watched",
     icon: <Check className="size-[1em]" strokeWidth={4} />,
     iconBg: "bg-green",
     count: 0, // Placeholder
-    listLink: true
+    listLink: true,
   },
-  { 
+  {
     title: "Favourites",
     icon: <Star className="size-[1em] fill-white" />,
     iconBg: "bg-orange",
     count: 0,
-    listLink: true
+    listLink: true,
   },
-  { 
+  {
     title: "Statistics",
     icon: <TrendingUp className="size-[1em]" />,
     count: null,
     link: "/stats",
   },
-  { 
+  {
     title: "Subscriptions",
     icon: <Tv className="size-[1em]" />,
     iconBg: "",
     count: 3,
-    listLink: false
+    listLink: false,
   },
-  { 
+  {
     title: "Recently Viewed",
     icon: <Eye className="size-[1em] text-neutral-500" />,
     iconBg: "",
     count: 5,
-    listLink: true
+    listLink: true,
   },
 ];
 
@@ -75,27 +86,27 @@ const cards = [
 ];
 
 const userLists = [
-  { 
+  {
     title: "New List",
     icon: <List className="size-[1em]" />,
-    listLink: true
+    listLink: true,
   },
-  { 
+  {
     title: "Favourite Horror Movies",
     icon: <Skull className="size-[1em]" />,
     count: 13,
-    listLink: true
+    listLink: true,
   },
 ];
 
 // const likedLists = [
-//   { 
+//   {
 //     title: "The 96th Academy Awards (2024)",
 //     icon: <Clapperboard className="size-[1em]" />,
 //     count: 13,
 //     listLink: true
 //   },
-//   { 
+//   {
 //     title: "Top 10 Morgan Freeman Movies",
 //     icon: <UserRound className="size-[1em]" />,
 //     count: 10,
@@ -103,18 +114,28 @@ const userLists = [
 //   },
 // ];
 
-const tags = ['datenight', 'nostalgia', 'cool', 'torecommend' ]
+const tags = ["datenight", "nostalgia", "cool", "torecommend"];
 
-function SectionHeading({ title, show, setShow }: { 
+function SectionHeading({
+  title,
+  show,
+  setShow,
+}: {
   title: string;
   show: boolean;
   setShow: (show: boolean) => void;
 }) {
   return (
-    <h2 onClick={() => setShow(!show)} className="flex items-center justify-between text-xl font-bold px-3 cursor-pointer">
+    <h2
+      onClick={() => setShow(!show)}
+      className="flex cursor-pointer items-center justify-between px-3 text-xl font-bold"
+    >
       {title}
-      <button className="p-2 -mr-2">
-        <ChevronDown className={`size-4 text-accent ${show ? '' : '-rotate-90'} transition-transform duration-300`} strokeWidth={3} />
+      <button className="-mr-2 p-2">
+        <ChevronDown
+          className={`size-4 text-accent ${show ? "" : "-rotate-90"} transition-transform duration-300`}
+          strokeWidth={3}
+        />
       </button>
     </h2>
   );
@@ -122,11 +143,11 @@ function SectionHeading({ title, show, setShow }: {
 
 export function HomePage() {
   const [firstLoad, setFirstLoad] = useState(() => {
-    const hasLoaded = localStorage.getItem('hasLoaded');
+    const hasLoaded = localStorage.getItem("hasLoaded");
     return !hasLoaded; // Set to true if not loaded before
   });
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [showNewListCard, setShowNewListCard] = useState(false);
@@ -135,7 +156,7 @@ export function HomePage() {
   // Check if app is loaded first time
   useEffect(() => {
     if (!firstLoad) return; // If not first load, do nothing
-    localStorage.setItem('hasLoaded', 'true');
+    localStorage.setItem("hasLoaded", "true");
     setFirstLoad(false); // Set to false after first load
   }, [firstLoad]);
 
@@ -149,16 +170,24 @@ export function HomePage() {
     const user = getUserData();
     if (!user) return;
 
-    const watchedCount = user.watchlist.filter(item => item.movie.watched).length;
-    const favouritesCount = user.watchlist.filter(item => item.movie.favourite).length;
-    
+    const watchedCount = user.watchlist.filter(
+      (item) => item.movie.watched,
+    ).length;
+    const favouritesCount = user.watchlist.filter(
+      (item) => item.movie.favourite,
+    ).length;
+
     // const watchlistCount = user.watchlist.length;
-    const watchlistCount = user.watchlist.filter(item => {
-      const releaseDate = item.movie.release_date ? new Date(item.movie.release_date) : new Date();
+    const watchlistCount = user.watchlist.filter((item) => {
+      const releaseDate = item.movie.release_date
+        ? new Date(item.movie.release_date)
+        : new Date();
       return releaseDate <= new Date() && !item.movie.watched; // Check if the release date is in the past
     }).length;
-    const upcomingCount = user.watchlist.filter(item => {
-      const releaseDate = item.movie.release_date ? new Date(item.movie.release_date) : new Date();
+    const upcomingCount = user.watchlist.filter((item) => {
+      const releaseDate = item.movie.release_date
+        ? new Date(item.movie.release_date)
+        : new Date();
       return releaseDate > new Date() && !item.movie.watched; // Check if the release date is in the future and movie is not watched
     }).length;
 
@@ -191,25 +220,25 @@ export function HomePage() {
   // Function to activate the SearchBar
   const activateSearchBar = () => {
     setIsSearchActive(true);
-    setTimeout(() => { window.scrollTo(0, 0) }, 50); // Prevent page bouncing on mobile
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 50); // Prevent page bouncing on mobile
   };
   const deactivateSearchBar = () => {
     setIsSearchActive(false);
     if (searchResults.length > 0) handleCounts();
   };
-  
+
   // Show NewListCard when "Add List" is clicked
   const handleAddListClick = () => {
+    document.body.classList.add("overflow-hidden", "card-active");
     setShowNewListCard(true);
-    document.body.classList.add("overflow-hidden"); // Disable page scroll
-    document.body.classList.add("card-active");
   };
-  
+
   // Hide NewListCard when "Cancel" is clicked
   const handleCancel = () => {
     setShowNewListCard(false);
-    document.body.classList.remove("overflow-hidden"); // Re-enable page scroll
-    document.body.classList.remove("card-active");
+    document.body.classList.remove("overflow-hidden", "card-active"); // Re-enable page scroll
   };
 
   // Handle Scrolling
@@ -222,9 +251,9 @@ export function HomePage() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -248,7 +277,7 @@ export function HomePage() {
   return (
     <>
       <TopBar searchBar scrolled={isScrolled} isSearchActive={isSearchActive}>
-        <SearchBar 
+        <SearchBar
           onSearch={(value) => {
             setQuery(value);
           }}
@@ -258,35 +287,38 @@ export function HomePage() {
         />
       </TopBar>
 
-      <main 
-        className={`min-h-screen px-4 pb-24 flex flex-col gap-6 overflow-x-hidden overscroll-auto"} transition-all duration-300 card-active-effect-scale`}
-        style={ isPWA ? { paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" } : undefined }
+      <main
+        className={`overscroll-auto"} card-active-effect-scale flex min-h-screen flex-col gap-6 overflow-x-hidden px-4 pb-24 transition-all duration-300`}
+        style={
+          isPWA
+            ? { paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)" }
+            : undefined
+        }
         // style={ isScrolled ? { paddingTop: "calc(env(safe-area-inset-top) + 2.75rem)" } : undefined }
       >
         {searchResults.length > 0 ? (
-          <ul 
-            className={`search-results absolute w-full z-30 left-0 h-[calc(100vh_-_3.75rem_-_env(safe-area-inset-bottom))] select-none overflow-y-scroll bg-black`}
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)"}}
+          <ul
+            className={`search-results absolute left-0 z-30 h-[calc(100vh_-_3.75rem_-_env(safe-area-inset-bottom))] w-full select-none overflow-y-scroll bg-black`}
+            style={{
+              paddingBottom: "calc(env(safe-area-inset-bottom) + 6rem)",
+            }}
           >
             {searchResults.map((movie, index) => (
               <li key={movie.id}>
-                <MovieCard
-                  movie={movie}
-                  index={index}
-                />
-                <hr className="border-neutral-900 ml-[4.375rem]" />
+                <MovieCard movie={movie} index={index} />
+                <hr className="ml-[4.375rem] border-neutral-900" />
               </li>
             ))}
           </ul>
         ) : (
           query && ( // Only show if there is a query
-            <div className="absolute z-30 inset-0 flex items-center justify-center text-neutral-600 bg-black">
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black text-neutral-600">
               <span className="sr-only">No results</span>
             </div>
           )
         )}
 
-        <section className="grid grid-cols-2 grid-rows-3 gap-4 mt-1">
+        <section className="mt-1 grid grid-cols-2 grid-rows-3 gap-4">
           {cards.map((category, index) => (
             <ListCard
               key={category.title}
@@ -297,13 +329,17 @@ export function HomePage() {
               link={category.link ? category.link : undefined}
               index={index}
               firstLoad={firstLoad}
-              className={`${index === 2 ? 'row-start-2' : ''}${index === 3 ? 'row-span-2 row-start-2 size-full' : ''}${index === 4 ? 'row-start-3' : ''}`}
+              className={`${index === 2 ? "row-start-2" : ""}${index === 3 ? "row-span-2 row-start-2 size-full" : ""}${index === 4 ? "row-start-3" : ""}`}
             />
           ))}
         </section>
 
         <section>
-          <SectionHeading title="My Lists" show={visibility.userLists} setShow={() => toggleVisibility('userLists')} />
+          <SectionHeading
+            title="My Lists"
+            show={visibility.userLists}
+            setShow={() => toggleVisibility("userLists")}
+          />
           {visibility.userLists && (
             <ListContainer>
               {userLists.map((list) => (
@@ -320,7 +356,11 @@ export function HomePage() {
         </section>
 
         <section>
-          <SectionHeading title="Home" show={visibility.home} setShow={() => toggleVisibility('home')} />
+          <SectionHeading
+            title="Home"
+            show={visibility.home}
+            setShow={() => toggleVisibility("home")}
+          />
           {visibility.home && (
             <ListContainer>
               {defaultLists.map((list) => (
@@ -339,13 +379,15 @@ export function HomePage() {
         </section>
 
         <section>
-          <SectionHeading title="Tags" show={visibility.tags} setShow={() => toggleVisibility('tags')} />
+          <SectionHeading
+            title="Tags"
+            show={visibility.tags}
+            setShow={() => toggleVisibility("tags")}
+          />
           {visibility.tags && (
-            <ListContainer className="!flex-row flex-wrap gap-2 text-sm p-3 child:flex child:items-center child:gap-1 child:px-3 child:py-2 child:bg-neutral-800 child:text-neutral-400 child:rounded-xl mt-3">
+            <ListContainer className="mt-3 !flex-row flex-wrap gap-2 p-3 text-sm child:flex child:items-center child:gap-1 child:rounded-xl child:bg-neutral-800 child:px-3 child:py-2 child:text-neutral-400">
               {tags.map((tag) => (
-                <button key={tag}>
-                  #{tag}
-                </button>
+                <button key={tag}>#{tag}</button>
               ))}
               <button>
                 <Plus className="size-4" /> Add Tag
@@ -355,12 +397,14 @@ export function HomePage() {
         </section>
 
         <section>
-          <SectionHeading title="Smart Lists" show={visibility.smartLists} setShow={() => toggleVisibility('smartLists')} />
+          <SectionHeading
+            title="Smart Lists"
+            show={visibility.smartLists}
+            setShow={() => toggleVisibility("smartLists")}
+          />
           {visibility.smartLists && (
-            <ListContainer className="py-8 text-sm text-neutral-700 items-center justify-center">
-              <p className="text-sm">
-                Available soon
-              </p>
+            <ListContainer className="items-center justify-center py-8 text-sm text-neutral-700">
+              <p className="text-sm">Available soon</p>
             </ListContainer>
           )}
         </section>
@@ -370,7 +414,9 @@ export function HomePage() {
         {showNewListCard && (
           <>
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
               className="fixed inset-0 z-50 bg-black/50 backdrop-blur-lg"
             />
@@ -379,12 +425,12 @@ export function HomePage() {
         )}
       </AnimatePresence>
 
-      <BottomBar 
+      <BottomBar
         onSearchClick={activateSearchBar}
         onAddListClick={handleAddListClick}
       />
 
-      <PWAPrompt 
+      <PWAPrompt
         appIconPath="img/icon-512.png"
         copySubtitle="PopcornTrail"
         timesToShow={2}

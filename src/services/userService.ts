@@ -1,6 +1,6 @@
-import { User } from '../types/User';
+import { User } from "../types/User";
 
-const USER_KEY = 'userData'; // Key to store user data in local storage
+const USER_KEY = "userData"; // Key to store user data in local storage
 
 // Get user data
 export const getUserData = (): User | null => {
@@ -13,9 +13,9 @@ let user = getUserData();
 // Initialize user data (temporarily in localStorage)
 export const initializeUser = () => {
   const defaultUser: User = {
-    username: 'user',
-    password: 'password',
-    country: 'Unknown',
+    username: "user",
+    password: "password",
+    country: "Unknown",
     display: {
       darkMode: true,
     },
@@ -36,11 +36,16 @@ export const saveUserData = (user: User) => {
 };
 
 // Handle user actions
-export const addMovieToWatchlist = (movieId: string, movieTitle: string, moviePoster: string, releaseDate: string) => {
+export const addMovieToWatchlist = (
+  movieId: string,
+  movieTitle: string,
+  moviePoster: string,
+  releaseDate: string,
+) => {
   user = getUserData();
   if (!user) return;
 
-  const movieExists = user.watchlist.find(item => item.movie.id === movieId);
+  const movieExists = user.watchlist.find((item) => item.movie.id === movieId);
   if (!movieExists) {
     user.watchlist.push({
       movie: {
@@ -53,7 +58,7 @@ export const addMovieToWatchlist = (movieId: string, movieTitle: string, moviePo
       },
     });
     saveUserData(user);
-    console.log("Movie added to Watchlist")
+    console.log("Movie added to Watchlist");
   }
 };
 
@@ -61,19 +66,26 @@ export const removeMovieFromWatchlist = (movieId: string) => {
   user = getUserData();
   if (!user) return;
 
-  user.watchlist = user.watchlist.filter(item => item.movie.id !== movieId);
+  user.watchlist = user.watchlist.filter((item) => item.movie.id !== movieId);
   saveUserData(user);
-  console.log("Movie removed from Watchlist")
+  console.log("Movie removed from Watchlist");
 };
 
-export const toggleWatchedStatus = (movieId: string, movieTitle: string, moviePoster?: string, releaseDate?: string) => {
+export const toggleWatchedStatus = (
+  movieId: string,
+  movieTitle: string,
+  moviePoster?: string,
+  releaseDate?: string,
+) => {
   user = getUserData();
   if (!user) return;
-    
-  const movie = user.watchlist.find(item => item.movie.id === movieId);
+
+  const movie = user.watchlist.find((item) => item.movie.id === movieId);
   if (movie) {
     movie.movie.watched = !movie.movie.watched;
-    console.log(`Movie marked as ${movie.movie.watched ? "Unwatched" : "Watched"}`)
+    console.log(
+      `Movie marked as ${movie.movie.watched ? "Unwatched" : "Watched"}`,
+    );
     saveUserData(user);
   } else {
     user.watchlist.push({
@@ -87,7 +99,7 @@ export const toggleWatchedStatus = (movieId: string, movieTitle: string, moviePo
       },
     });
     saveUserData(user);
-    console.log("Movie added to Watchlist and marked as Watched")
+    console.log("Movie added to Watchlist and marked as Watched");
   }
 };
 
@@ -95,10 +107,14 @@ export const toggleFavouriteStatus = (movieId: string) => {
   user = getUserData();
   if (!user) return;
 
-  const movie = user.watchlist.find(item => item.movie.id === movieId);
+  const movie = user.watchlist.find((item) => item.movie.id === movieId);
   if (movie) {
     movie.movie.favourite = !movie.movie.favourite;
-    console.log(movie.movie.favourite ? "Movie removed from Favourites" : "Movie added to Favourites");
+    console.log(
+      movie.movie.favourite
+        ? "Movie removed from Favourites"
+        : "Movie added to Favourites",
+    );
     saveUserData(user);
   }
 };
@@ -109,5 +125,5 @@ export const addRecentlyViewed = (movieId: string) => {
 
   user.recentlyViewed.push({ movieId });
   saveUserData(user);
-  console.log("Movie added to Recently Watched")
+  console.log("Movie added to Recently Watched");
 };

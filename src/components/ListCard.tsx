@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 interface ListCardProps {
   title: string;
@@ -13,22 +13,37 @@ interface ListCardProps {
   className?: string;
 }
 
-export function ListCard({ title, icon, iconBg, count, link, index, firstLoad, className  }: ListCardProps) {
+export function ListCard({
+  title,
+  icon,
+  iconBg,
+  count,
+  link,
+  index,
+  firstLoad,
+  className,
+}: ListCardProps) {
   return (
     <Link
       to={link ? link : `/list/${title.toLowerCase().replace(/ /g, "-")}`}
       className={`${className ? className : ""}`}
     >
       <motion.div
-        initial={firstLoad ? {opacity: 0, y: 20} : {opacity: 1, y: 0} }
+        initial={firstLoad ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className={`flex flex-col justify-between size-full bg-neutral-900 rounded-2xl p-3 pb-2`}
+        className={`flex size-full flex-col justify-between rounded-2xl bg-neutral-900 p-3 pb-2`}
       >
-        <div className="flex w-full justify-between items-center gap-4 mb-1.5">
-          <span className={`text-xl rounded-full p-2 ${iconBg ? iconBg : 'bg-neutral-800' }`}>{icon}</span>
+        <div className="mb-1.5 flex w-full items-center justify-between gap-4">
+          <span
+            className={`rounded-full p-2 text-xl ${iconBg ? iconBg : "bg-neutral-800"}`}
+          >
+            {icon}
+          </span>
           {count !== null && (
-            <span className="text-white text-2xl font-semibold truncate mr-1">{count}</span>
+            <span className="mr-1 truncate text-2xl font-semibold text-white">
+              {count}
+            </span>
           )}
         </div>
         <span className="text-sm font-medium text-neutral-500">{title}</span>

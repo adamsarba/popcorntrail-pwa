@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_KEY = 'fc479d0b099a6cdc31b3492cc700a715'; 
-const BASE_URL = 'https://api.themoviedb.org/3';
+const API_KEY = "fc479d0b099a6cdc31b3492cc700a715";
+const BASE_URL = "https://api.themoviedb.org/3";
 
 export const searchMovies = async (query: string) => {
   try {
@@ -13,7 +13,7 @@ export const searchMovies = async (query: string) => {
     });
     return response.data.results;
   } catch (error) {
-    console.error('Error fetching movies:', error);
+    console.error("Error fetching movies:", error);
     return [];
   }
 };
@@ -27,7 +27,7 @@ export const getMovieById = async (id: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching movie by ID:', error);
+    console.error("Error fetching movie by ID:", error);
     return null;
   }
-}; 
+};

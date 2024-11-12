@@ -8,8 +8,8 @@ This project is currently hosted on [Netlify](https://popcorntrail.netlify.app).
 
 - **Movie Search**: Search for movies and add them to your watchlist.
 - **PWA Support**: Install the app on your device for offline access.
-<!-- - **User Lists**: Create and manage custom lists for movies. -->
-<!-- - **Statistics**: View statistics about watched and favorite movies. -->
+  <!-- - **User Lists**: Create and manage custom lists for movies. -->
+  <!-- - **Statistics**: View statistics about watched and favorite movies. -->
 
 ## Technologies Used
 
@@ -22,16 +22,19 @@ This project is currently hosted on [Netlify](https://popcorntrail.netlify.app).
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/adamsarba/movie-tracker.git
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd movie-tracker
    ```
 
 3. Install dependencies:
+
    ```bash
    npm install
    ```

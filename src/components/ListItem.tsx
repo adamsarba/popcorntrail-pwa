@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 
 interface ListItemProps {
   title: string;
@@ -13,16 +13,32 @@ interface ListItemProps {
   onClick?: () => void;
 }
 
-export function ListItem({ title, icon, iconBg, count, link, listLink, className, onClick }: ListItemProps) {
-  const url = link || (listLink ? `/list/${title.toLowerCase().replace(/ /g, "-")}` : undefined);
+export function ListItem({
+  title,
+  icon,
+  iconBg,
+  count,
+  link,
+  listLink,
+  className,
+  onClick,
+}: ListItemProps) {
+  const url =
+    link ||
+    (listLink ? `/list/${title.toLowerCase().replace(/ /g, "-")}` : undefined);
 
   function Item({ onClick }: { onClick?: () => void }) {
     return (
       <>
-        <div className={`flex items-center justify-between text-sm ${icon ? "with-icon p-3" : "px-4 py-3"} ${!url ? "ui-list-item" : ""} ${className ? className : ""} ${onClick ? "cursor-pointer" : ""}`} onClick={onClick}>
+        <div
+          className={`flex items-center justify-between text-sm ${icon ? "with-icon p-3" : "px-4 py-3"} ${!url ? "ui-list-item" : ""} ${className ? className : ""} ${onClick ? "cursor-pointer" : ""}`}
+          onClick={onClick}
+        >
           {icon ? (
             <div className="flex items-center gap-3">
-              <span className={`text-xl rounded-full p-2 ${iconBg ? iconBg : 'bg-neutral-800'}`}>
+              <span
+                className={`rounded-full p-2 text-xl ${iconBg ? iconBg : "bg-neutral-800"}`}
+              >
                 {icon}
               </span>
               <span className="line-clamp-2 pr-2">{title}</span>
@@ -31,12 +47,19 @@ export function ListItem({ title, icon, iconBg, count, link, listLink, className
             <span className="line-clamp-2 pr-2">{title}</span>
           )}
           <div className="flex items-center gap-2">
-            {count && count !== null && count > 0 ? <span className="text-neutral-500">{count}</span> : ""}
-            <ChevronRight className={`size-4 text-neutral-700 ${!icon ? "-mr-1" : ""}`} strokeWidth={3} />
+            {count && count !== null && count > 0 ? (
+              <span className="text-neutral-500">{count}</span>
+            ) : (
+              ""
+            )}
+            <ChevronRight
+              className={`size-4 text-neutral-700 ${!icon ? "-mr-1" : ""}`}
+              strokeWidth={3}
+            />
           </div>
         </div>
       </>
-    )
+    );
   }
 
   return (
@@ -44,7 +67,12 @@ export function ListItem({ title, icon, iconBg, count, link, listLink, className
       {!url ? (
         <Item onClick={onClick} />
       ) : url.startsWith("http") ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="ui-list-item">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ui-list-item"
+        >
           <Item />
         </a>
       ) : (

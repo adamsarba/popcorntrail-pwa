@@ -7,4 +7,4 @@ export type Movie = {
   favourite: boolean;
   onList?: { listName: string }[];
   tags?: string[];
-}
+};

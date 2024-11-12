@@ -14,8 +14,8 @@
   :root {
     color-scheme: dark;
     overscroll-behavior: none; /* remove after fixing hiding the SearchBar on scroll */
-    
-    --cubic-bezier: cubic-bezier(.16, 1, .3, 1);
+
+    --cubic-bezier: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* html {
@@ -38,85 +38,89 @@
   }
   header.scrolled .search-bar {
     height: 0;
-    transform: scale(.9);
+    transform: scale(0.9);
     opacity: 0;
     margin: 0 !important;
   }
 
   /* Section Container */
   .settings-heading {
-    @apply px-4 uppercase text-xs text-neutral-500;
+    @apply px-4 text-xs uppercase text-neutral-500;
   }
 
   /* Active Card Component */
   .card-active-effect-scale {
-    @apply origin-bottom ease-out;;
+    @apply origin-bottom ease-out;
   }
   .card-active .card-active-effect-scale {
-    transform: scale(.975);
+    transform: scale(0.975);
   }
 }
 
 @layer components {
   /* Loading Spinner */
   .spinner {
-    @apply inline-block relative size-8;
+    @apply relative inline-block size-8;
   }
 
   .spinner > span {
-    @apply 
-      absolute left-[48%] top-[42%]
-      w-[6%] h-[16%] 
-      bg-white opacity-0
-      rounded-3xl;
-    box-shadow: 0 0 3px rgba(0,0,0,0.2);
-    -webkit-box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    @apply absolute left-[48%] top-[42%] h-[16%] w-[6%] rounded-3xl bg-white opacity-0;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
     animation: fade 1s linear infinite;
     -webkit-animation: fade 1s linear infinite;
   }
 
   @keyframes fade {
-    from {opacity: 1;}
-    to {opacity: 0.25;}
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.25;
+    }
   }
 
   @-webkit-keyframes fade {
-    from {opacity: 1;}
-    to {opacity: 0.25;}
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.25;
+    }
   }
 
   .spinner > .bar1 {
     transform: rotate(0deg) translate(0, -130%);
     animation-delay: 0s;
-  }    
+  }
 
   .spinner > .bar2 {
-    transform: rotate(45deg) translate(0, -130%); 
+    transform: rotate(45deg) translate(0, -130%);
     animation-delay: -0.875s;
   }
 
   .spinner > .bar3 {
-    transform: rotate(90deg) translate(0, -130%); 
+    transform: rotate(90deg) translate(0, -130%);
     animation-delay: -0.75s;
   }
   .spinner > .bar4 {
-    transform: rotate(135deg) translate(0, -130%); 
+    transform: rotate(135deg) translate(0, -130%);
     animation-delay: -0.625s;
   }
   .spinner > .bar5 {
-    transform: rotate(180deg) translate(0, -130%); 
+    transform: rotate(180deg) translate(0, -130%);
     animation-delay: -0.5s;
   }
   .spinner > .bar6 {
-    transform: rotate(225deg) translate(0, -130%); 
+    transform: rotate(225deg) translate(0, -130%);
     animation-delay: -0.375s;
   }
   .spinner > .bar7 {
-    transform: rotate(270deg) translate(0, -130%); 
+    transform: rotate(270deg) translate(0, -130%);
     animation-delay: -0.25s;
   }
   .spinner > .bar8 {
-    transform: rotate(315deg) translate(0, -130%); 
+    transform: rotate(315deg) translate(0, -130%);
     animation-delay: -0.125s;
   }
 
@@ -126,7 +130,7 @@
   }
   .ui-list-item:not(:last-child):after {
     content: "";
-    @apply absolute bottom-0 right-0 block h-[1px] bg-neutral-800 ml-auto;
+    @apply absolute bottom-0 right-0 ml-auto block h-[1px] bg-neutral-800;
     width: calc(100% - 1rem);
   }
   .ui-list-item.with-icon:not(:last-child):after {
@@ -142,7 +146,7 @@
   [class*="iOSPWA-panel"] {
     @apply rounded-t-2xl;
   }
-  
+
   [class*="iOSPWA-panel"] [class*="_appIcon_"] {
     @apply rounded-xl;
   }
@@ -151,7 +155,7 @@
   /* .pt-safe {
     padding-top: calc(env(safe-area-inset-top));
   } */
-  
+
   /* .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom));
   } */
