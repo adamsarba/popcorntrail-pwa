@@ -1,10 +1,22 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import path from "path";
+import fs from "fs";
+// import basicSsl from "@vitejs/plugin-basic-ssl";
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: "create-redirects",
+      writeBundle() {
+        fs.writeFileSync(
+          path.resolve(__dirname, "dist/_redirects"),
+          "/* /index.html 200"
+        );
+      },
+    },
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["img/icon-512.png"],
@@ -26,6 +38,7 @@ export default defineConfig({
         ],
       },
     }),
+    // ...(process.env.NODE_ENV === "development" ? [basicSsl()] : []),
   ],
   optimizeDeps: {
     exclude: ["lucide-react"],
