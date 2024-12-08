@@ -13,7 +13,7 @@
 
   :root {
     color-scheme: dark;
-    overscroll-behavior: none; /* remove after fixing hiding the SearchBar on scroll */
+    /* overscroll-behavior: none; remove after fixing hiding the SearchBar on scroll */
 
     --cubic-bezier: cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -28,19 +28,11 @@
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
-    overscroll-behavior: none;
+    /* overscroll-behavior: none; */
   }
 
-  /* Hie Search Bar on scroll */
-  header .search-bar {
-    height: 2rem;
-    @apply transition-all duration-300;
-  }
-  header.scrolled .search-bar {
-    height: 0;
-    transform: scale(0.9);
-    opacity: 0;
-    margin: 0 !important;
+  #root > main {
+    @apply container;
   }
 
   /* Section Container */
@@ -58,6 +50,124 @@
 }
 
 @layer components {
+  /* Context Menu */
+  .context-menu-container {
+    @apply fixed right-2.5 z-50 origin-top-right rounded-xl bg-neutral-800/75 backdrop-blur-xl;
+  }
+  .context-menu {
+    @apply w-[80vw] max-w-[16rem] text-sm; /* child:flex child:cursor-pointer child:items-center child:justify-between child:gap-2 child:border-neutral-700 child:px-4 child:py-2.5 child:text-left hover:child:bg-neutral-800 [&>:not(:last-child)]:border-b */
+  }
+  .context-menu li:not(:has(a)),
+  .context-menu li > a {
+    @apply flex cursor-pointer items-center justify-between gap-2 border-neutral-700 px-4 py-2.5 text-left hover:bg-neutral-600/50;
+  }
+  .context-menu li:not(:last-child):not(:has(+ .separator)) {
+    @apply border-b;
+  }
+  .context-menu.with-submenu li:not(:has(a)),
+  .context-menu.with-submenu li > a {
+    @apply pl-8;
+  }
+  .context-menu li.separator {
+    @apply !cursor-default !border-0 !bg-neutral-950/25 !p-1;
+  }
+  .context-menu .disabled {
+    @apply !cursor-default !bg-transparent text-neutral-100/25;
+  }
+
+  /* Search Bar */
+  @media (min-width: 64rem) {
+    header:has(.search-bar.container) {
+      @apply px-0;
+    }
+    header .search-bar.container {
+      @apply px-3;
+    }
+  }
+
+  /* List Items */
+  .ui-list-item:not(:last-child) {
+    @apply relative;
+  }
+  .ui-list-item:not(:last-child):after {
+    content: "";
+    @apply absolute bottom-0 right-0 ml-auto block h-[1px] bg-neutral-800;
+    width: calc(100% - 1rem);
+  }
+  .ui-list-item:has(.with-icon):not(:last-child):after,
+  .ui-list-item.with-icon:not(:last-child):after {
+    width: calc(100% - 3.75rem);
+  }
+  a.ui-list-item:not(:last-child) {
+    display: block;
+  }
+
+  /* List (Full Width) */
+  .ui-list-full {
+    @apply bg-neutral-800/50 pl-4 leading-5 child:flex child:items-center child:justify-between child:gap-3 child:border-neutral-800 child:py-3 child:pr-4 [&>:not(:last-child)]:border-b;
+  }
+
+  .ui-list-full .li-key {
+    @apply text-sm text-neutral-100/50;
+  }
+  .ui-list-full button.li-key {
+    @apply flex w-full items-center justify-between;
+  }
+  .ui-list-full .li-val {
+    @apply inline-block text-balance text-right text-neutral-100/75;
+  }
+
+  /* Tooltip */
+  .tooltip-arrow-up {
+    @apply top-full mt-2 origin-top rounded-lg bg-neutral-950/50 p-3 shadow-sm;
+  }
+  .tooltip-arrow-up,
+  .tooltip-arrow-up::before {
+    @apply absolute left-1/2 z-50 backdrop-blur-xl;
+  }
+
+  /* .tooltip-arrow-up::before {
+    content: "";
+    --size: 0.5rem;
+    border-left: var(--size) solid transparent;
+    border-right: var(--size) solid transparent;
+    border-bottom: var(--size) solid black;
+    @apply -top-2 -translate-x-1/2;
+  } */
+
+  /* Movie Page */
+
+  /* .inline-gradient-mask::before,
+  .inline-gradient-mask::after {
+    content: "";
+    @apply pointer-events-none absolute size-full from-black to-transparent to-15%;
+  }
+  .inline-gradient-mask::before {
+    @apply bg-gradient-to-r;
+  }
+  .inline-gradient-mask::after {
+    @apply bg-gradient-to-l;
+  } */
+
+  .overview-truncated:after {
+    content: "";
+    @apply absolute bottom-0 left-0 h-12 w-full bg-gradient-to-b from-transparent to-black opacity-0 transition-opacity duration-300;
+  }
+  .overview-truncated.collapsed:after {
+    @apply opacity-100;
+  }
+
+  /* PWA Prompt */
+  [class*="iOSPWA-panel"] {
+    @apply rounded-t-2xl;
+  }
+
+  [class*="iOSPWA-panel"] [class*="_appIcon_"] {
+    @apply rounded-xl;
+  }
+}
+
+@layer utilities {
   /* Loading Spinner */
   .spinner {
     @apply relative inline-block size-8;
@@ -124,39 +234,34 @@
     animation-delay: -0.125s;
   }
 
-  /* List Items */
-  .ui-list-item:not(:last-child) {
-    @apply relative;
-  }
-  .ui-list-item:not(:last-child):after {
-    content: "";
-    @apply absolute bottom-0 right-0 ml-auto block h-[1px] bg-neutral-800;
-    width: calc(100% - 1rem);
-  }
-  .ui-list-item.with-icon:not(:last-child):after {
-    width: calc(100% - 3.75rem);
-  }
-  a.ui-list-item:not(:last-child) {
-    display: block;
-  }
-}
-
-@layer utilities {
-  /* PWA Prompt */
-  [class*="iOSPWA-panel"] {
-    @apply rounded-t-2xl;
-  }
-
-  [class*="iOSPWA-panel"] [class*="_appIcon_"] {
-    @apply rounded-xl;
-  }
-
   /* Safe area for iOS */
   /* .pt-safe {
     padding-top: calc(env(safe-area-inset-top));
-  } */
+  }
 
-  /* .pb-safe {
+  .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom));
   } */
+
+  /* Hide Search Bar on scroll */
+  /* header .search-bar {
+    height: 2rem;
+    @apply transition-all duration-300;
+  }
+
+  .search-bar.scrolled {
+    height: 0;
+    transform: scale(0.9);
+    opacity: 0;
+    margin: 0 !important;
+  } */
+
+  /* User selection */
+  ::selection {
+    @apply bg-blue text-neutral-100;
+  }
+
+  ::-moz-selection {
+    @apply bg-blue text-neutral-100;
+  }
 }

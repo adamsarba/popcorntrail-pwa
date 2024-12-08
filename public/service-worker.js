@@ -1,4 +1,4 @@
-const CACHE_NAME = "v0.0.1";
+const CACHE_NAME = "v0.0.73";
 
 self.addEventListener("install", (event) => {
   console.log("Service Worker: Installing...");
@@ -11,7 +11,7 @@ self.addEventListener("install", (event) => {
           "/index.html",
           "/src/main.tsx",
           "/src/index.css",
-          "/public/img/icon-512.png",
+          "/img/icon-512.png",
         ])
         .then(() => {
           console.log("Service Worker: Caching completed");
@@ -20,8 +20,10 @@ self.addEventListener("install", (event) => {
           console.error("Service Worker: Failed to cache files");
           console.error(error);
         });
-    }),
+    })
   );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -31,20 +33,22 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log("Service Worker: Removing old cache...", cacheName);
+            console.log(`Service Worker: Removing old cache... (${cacheName})`);
             return caches.delete(cacheName);
           }
-        }),
+        })
       );
-    }),
+    })
   );
+  // Take control of all clients as soon as it activates
+  event.waitUntil(clients.claim());
 });
 
 self.addEventListener("fetch", (event) => {
-  console.log("Service Worker: Fetching...", event.request.url);
+  // console.log("Service Worker: Fetching...", event.request.url);
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
-    }),
+    })
   );
 });

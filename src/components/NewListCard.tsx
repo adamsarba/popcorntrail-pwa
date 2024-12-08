@@ -7,9 +7,9 @@ interface NewListCardProps {
 export function NewListCard({ onCancel }: NewListCardProps) {
   return (
     <motion.div
-      initial={{ y: "100%" }}
+      initial={{ y: "50%" }}
       animate={{ y: 0 }}
-      exit={{ y: "100%" }}
+      exit={{ y: "50%" }}
       transition={{ duration: 0.5, type: "spring" }}
       className="fixed bottom-0 top-[50vh] z-50 h-screen w-full rounded-t-2xl bg-black/75 p-4 backdrop-blur-sm"
     >

@@ -8,8 +8,6 @@ export const getUserData = (): User | null => {
   return data ? JSON.parse(data) : null;
 };
 
-let user = getUserData();
-
 // Initialize user data (temporarily in localStorage)
 export const initializeUser = () => {
   const defaultUser: User = {
@@ -18,10 +16,14 @@ export const initializeUser = () => {
     country: "Unknown",
     display: {
       darkMode: true,
+      homePage: {
+        userLists: true,
+        main: true,
+        tags: true,
+        smartLists: false,
+      },
     },
     watchlist: [],
-    recentlyViewed: [],
-    subscriptions: [],
   };
   saveUserData(defaultUser);
 };
@@ -40,9 +42,9 @@ export const addMovieToWatchlist = (
   movieId: string,
   movieTitle: string,
   moviePoster: string,
-  releaseDate: string,
+  releaseDate: string
 ) => {
-  user = getUserData();
+  const user = getUserData();
   if (!user) return;
 
   const movieExists = user.watchlist.find((item) => item.movie.id === movieId);
@@ -63,7 +65,7 @@ export const addMovieToWatchlist = (
 };
 
 export const removeMovieFromWatchlist = (movieId: string) => {
-  user = getUserData();
+  const user = getUserData();
   if (!user) return;
 
   user.watchlist = user.watchlist.filter((item) => item.movie.id !== movieId);
@@ -75,16 +77,16 @@ export const toggleWatchedStatus = (
   movieId: string,
   movieTitle: string,
   moviePoster?: string,
-  releaseDate?: string,
+  releaseDate?: string
 ) => {
-  user = getUserData();
+  const user = getUserData();
   if (!user) return;
 
   const movie = user.watchlist.find((item) => item.movie.id === movieId);
   if (movie) {
     movie.movie.watched = !movie.movie.watched;
     console.log(
-      `Movie marked as ${movie.movie.watched ? "Unwatched" : "Watched"}`,
+      `Movie marked as ${movie.movie.watched ? "Watched" : "Unwatched"}`
     );
     saveUserData(user);
   } else {
@@ -104,7 +106,7 @@ export const toggleWatchedStatus = (
 };
 
 export const toggleFavouriteStatus = (movieId: string) => {
-  user = getUserData();
+  const user = getUserData();
   if (!user) return;
 
   const movie = user.watchlist.find((item) => item.movie.id === movieId);
@@ -112,18 +114,18 @@ export const toggleFavouriteStatus = (movieId: string) => {
     movie.movie.favourite = !movie.movie.favourite;
     console.log(
       movie.movie.favourite
-        ? "Movie removed from Favourites"
-        : "Movie added to Favourites",
+        ? "Movie added to Favourites"
+        : "Movie removed from Favourites"
     );
     saveUserData(user);
   }
 };
 
-export const addRecentlyViewed = (movieId: string) => {
-  user = getUserData();
-  if (!user) return;
+// export const addRecentlyViewed = (movieId: string) => {
+//   const user = getUserData();
+//   if (!user) return;
 
-  user.recentlyViewed.push({ movieId });
-  saveUserData(user);
-  console.log("Movie added to Recently Watched");
-};
+//   user.recentlyViewed.push({ movieId });
+//   saveUserData(user);
+//   console.log("Movie added to Recently Watched");
+// };

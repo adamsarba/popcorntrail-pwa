@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+
 import { saveUserData, getUserData } from "../services/userService";
 import { Movie } from "../types/Movie";
+
 import { getMovieById } from "../services/tmdbService";
+import { usePapaParse } from "react-papaparse";
+
+// import { Spinner } from "../components/ui/Spinner";
 import { motion } from "framer-motion";
-import { Spinner } from "../components/ui/Spinner";
-import { File, Check } from "lucide-react";
+import { File, Info, Check, WifiOff } from "lucide-react";
+import { confettiAnimation } from "../utils/confettiUtils";
 
 const tabs = [
   { id: "csv", label: "CSV" },
@@ -12,107 +17,158 @@ const tabs = [
 ];
 
 export function Import() {
-  const [inputMethod, setInputMethod] = useState<"csv" | "textarea">("csv");
+  // const {
+  //   confettiBasic,
+  //   // confettiCanon, // emojiConfetti
+  // } = Confetti();
+
+  const { readString } = usePapaParse();
+  const [importMethod, setImportMethod] = useState<"csv" | "textarea">("csv");
   const [inputValue, setInputValue] = useState("");
   const [fileName, setFileName] = useState("");
+  const [fileData, setFileData] = useState<string[][]>([]);
+  const [totalIds, setTotalIds] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const isCancelledRef = useRef(false);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file.name);
-      setInputValue("");
-      const reader = new FileReader();
-      // reader.onload = (e) => {
-      //   const text = e.target?.result as string;
-      //   if (inputMethod === 'textarea') {
-      //     setInputValue(text);
-      //   } else {
-      //     setInputValue('');
-      //   }
-      // };
-      reader.readAsText(file);
+      // Clear previous data
+      setFileData([]);
       // Reset messages if there was any import before
       setMessage("");
       setError("");
+
+      console.log("Reading file...");
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+
+        readString(text, {
+          worker: true,
+          // step: (row) => {
+          //   console.log("Row:", row.data);
+          // },
+          complete: (results) => {
+            console.log(results);
+            setFileData((results.data as Array<string>[]) || []);
+            // Clear input
+            event.target.value = "";
+          },
+        });
+      };
+      reader.readAsText(file);
     }
   };
 
   const handleImport = async () => {
+    // Check if the user is online
+    if (!navigator.onLine) {
+      setMessage("offline");
+      return;
+    }
+
     const user = getUserData();
     if (!user) {
       setMessage("User data not found");
       return;
     }
 
-    // const movieIds = inputMethod === 'textarea'
-    // ? inputValue.split(',').map(id => id.trim())
-    // // inputMethod === 'csv'
-    // : inputValue.split('\n').map(line => line.split(';')[0].trim());
+    // const moviesToImport: string[] = [];
+    const moviesToImport: Array<{
+      id: string;
+      watched: boolean;
+      favourite: boolean;
+    }> = [];
 
-    const movieIds: string[] = [];
-    const watchedStatus: boolean[] = [];
-    const favouriteStatus: boolean[] = [];
+    if (importMethod === "csv") {
+      // Handle CSV data
+      const columnNames = fileData[0];
+      console.log("Columns:", columnNames);
 
-    const rows =
-      inputMethod === "csv"
-        ? inputValue.split("\n").map((row) => row.trim())
-        : inputValue.split(",").map((id) => id.trim()); // For textarea
-
-    const headers =
-      inputMethod === "csv"
-        ? rows[0].split(/[,;]/).map((header) => header.trim().toLowerCase())
-        : ["id"]; // For textarea, assuming that IDs are provided directly
-
-    const idIndex = headers.findIndex(
-      (header) => header === "id" || header === "the movie database id",
-    );
-    const watchedIndex = headers.findIndex((header) => header === "watched");
-    const favouriteIndex = headers.findIndex(
-      (header) => header === "favourite",
-    );
-
-    if (idIndex === -1) {
-      setMessage("ID column is required");
-      return;
-    }
-
-    for (let i = inputMethod === "csv" ? 1 : 0; i < rows.length; i++) {
-      const cells = rows[i]
-        .split(/[,;]/)
-        .map((cell) => cell.trim().replace(/^"|"$/g, "")); // Remove quotes if present
-      const id = cells[idIndex];
-
-      if (id) {
-        movieIds.push(id);
-        watchedStatus.push(
-          watchedIndex !== -1 ? cells[watchedIndex] === "1" : false,
+      // Find the index of the column
+      const findIndex = (keyword: string): number => {
+        return columnNames.findIndex((name) =>
+          name.toLowerCase().includes(keyword)
         );
-        favouriteStatus.push(
-          favouriteIndex !== -1 ? cells[favouriteIndex] === "1" : false,
-        );
+      };
+      const indexOfId: number = findIndex("id");
+      const indexOfWatched: number = findIndex("watched");
+      const indexOfFavourite = findIndex("favourite");
+
+      if (indexOfId === -1) {
+        const msg = "ID column not found";
+        console.error(msg);
+        setMessage(msg);
+        return;
+      }
+
+      const csvData = fileData.slice(1).map((row) => {
+        const id = row[indexOfId];
+        const watched = row[indexOfWatched] === "1" ? true : false; // prettier-ignore
+        const favourite = row[indexOfFavourite] === "1" ? true : false; // prettier-ignore
+
+        const movie = { id, watched, favourite };
+        return movie;
+      });
+
+      moviesToImport.push(...csvData);
+    } else {
+      // Handle textarea value
+      const movieIdStrings = inputValue.split(",").map((id) => id.trim());
+      for (let i = 0; i < movieIdStrings.length; i++) {
+        const id = movieIdStrings[i];
+        if (id) {
+          moviesToImport.push({ id, watched: false, favourite: false });
+        }
       }
     }
 
-    const moviesToAdd: Movie[] = [];
+    console.log("Movies:", moviesToImport);
+
     // Use a Set to track unique IDs from the textarea
     const uniqueIds = new Set<string>();
 
     // Create a Set of existing IDs in the user's watchlist for quick lookup
     const existingWatchlistIds = new Set(
-      user.watchlist.map((item) => item.movie.id.toString()),
+      user.watchlist.map((item) => item.movie.id.toString())
     );
 
-    const notFoundIds: string[] = []; // To track IDs not found in TMDB
-    const alreadyInWatchlistIds: string[] = []; // To track IDs already in the watchlist
+    const notFoundIds: string[] = []; // Track IDs not found in TMDB
+    const alreadyInWatchlistIds: string[] = []; // Track IDs already in the watchlist
+    const moviesToAdd: Movie[] = [];
 
+    // Set total IDs based on the import method
+    if (importMethod === "csv") {
+      setTotalIds(moviesToImport.length);
+    } else {
+      const movieIdStrings = inputValue.split(",").map((id) => id.trim());
+      setTotalIds(movieIdStrings.length);
+    }
+
+    setProgress(0);
     setLoading(true);
+    setMessage("");
+    setError("");
+    isCancelledRef.current = false;
 
-    for (const id of movieIds) {
-      setMessage("");
-      setError("");
+    console.groupCollapsed("Importing movies...");
+
+    for (const movie of moviesToImport) {
+      if (isCancelledRef.current) {
+        setMessage("Import cancelled");
+        break;
+      }
+
+      const id = movie.id;
+
+      if (id === undefined) continue;
 
       // Check if the ID is already in the Set
       if (uniqueIds.has(id)) {
@@ -132,20 +188,17 @@ export function Import() {
 
       try {
         console.log(`Fetching movie details for ID: ${id}`);
+        // setMessage("Getting " + msg);
         const movieData = await getMovieById(id);
 
         if (movieData) {
-          const index = movieIds.indexOf(id);
-          const watched = watchedStatus[index];
-          const favourite = favouriteStatus[index];
-
           moviesToAdd.push({
             id: movieData.id,
             title: movieData.title,
             poster_path: movieData.poster_path,
             release_date: movieData.release_date,
-            watched,
-            favourite,
+            watched: movie.watched,
+            favourite: movie.favourite,
           });
         } else {
           console.warn(`No results found for ID: ${id}`);
@@ -156,69 +209,83 @@ export function Import() {
         setMessage(`Error fetching movie with ID ${id}`);
         return;
       }
+
+      // Update progress after each movie is processed
+      setProgress((prev) => prev + 1);
     }
 
-    setLoading(false);
+    console.groupEnd();
 
     // Add movies to the user's watchlist only if there are movies to add
     if (moviesToAdd.length > 0) {
       console.log("Movies to add:", moviesToAdd);
       user.watchlist.push(...moviesToAdd.map((movie) => ({ movie })));
-      console.log("Updated user watchlist:", user.watchlist);
+      // console.log("Updated user watchlist:", user.watchlist);
       saveUserData(user);
       setMessage("success");
+      confettiAnimation();
     } else {
-      setMessage("No movies were added.");
+      setMessage("No movies were added");
     }
 
     // Show messages for IDs that were not found or already in the watchlist
     if (notFoundIds.length > 0) {
       setError(
         (prev) => `
-        <span class="text-red">IDs not found in TMDB:</span>
+        <span>These IDs were not found in TMDB:</span>
         <br />${notFoundIds.join(", ")}
         ${prev ? `<br />${prev}` : ""}
-      `,
+      `
       );
     }
     if (alreadyInWatchlistIds.length > 0) {
       setError(
         (prev) => `
-        <span class="text-orange">IDs already in watchlist:</span>
-        <br />${alreadyInWatchlistIds.join(", ")}
+        <span class="${prev ? "inline-block pb-2" : ""}">Some IDs are already in your watchlist</span>
         ${prev ? `<br />${prev}` : ""}
-      `,
+        `
+        // These IDs are already in your watchlist:
+        // <br />${alreadyInWatchlistIds.join(", ")}
       );
     }
 
-    setInputValue("");
+    if (importMethod === "csv") {
+      setFileName("");
+      setFileData([]);
+    } else {
+      setInputValue("");
+    }
+
+    setLoading(false);
+
+    console.log("Import completed");
+  };
+
+  const cancelImport = () => {
+    isCancelledRef.current = true;
+    console.warn("Import cancelled");
   };
 
   return (
-    <div className="text-sm text-neutral-500">
-      <p className="mb-4">
-        Currently, it is only possible to import Movies using The Movie Database
-        (TMDB) IDs. TV Shows and import from IMDb or Trakt will be available in
-        the future.
-      </p>
-
-      <div className="mb-2 flex gap-1 rounded-xl bg-neutral-900 p-1">
+    <>
+      {/* Import method tabs */}
+      <div
+        className={`mb-2 flex gap-1 rounded-xl bg-neutral-900 p-1 ${loading ? "child:cursor-not-allowed" : ""}`}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => {
-              setInputMethod(tab.id as "csv" | "textarea");
-              // setMessage('');
-              // setError('');
+              if (!loading) setImportMethod(tab.id as "csv" | "textarea");
             }}
             className={`${
-              inputMethod === tab.id
+              importMethod === tab.id
                 ? "font-semibold text-black"
-                : "--md:hover:opacity-50"
-            } relative flex-grow px-3 py-1.5 text-sm text-neutral-100 transition-all duration-150`}
+                : "sm:hover:opacity-50"
+            } relative flex-1 px-3 py-1.5 text-sm text-neutral-100 transition-all duration-150`}
           >
             <span className="relative z-10">{tab.label}</span>
-            {inputMethod === tab.id && (
+            {importMethod === tab.id && (
               <motion.span
                 layoutId="bubble"
                 className="absolute inset-0 rounded-lg bg-neutral-800"
@@ -229,81 +296,146 @@ export function Import() {
         ))}
       </div>
 
+      {/* Import method specific content */}
       <div className={`rounded-xl bg-neutral-900 px-4 pt-3`}>
-        {inputMethod === "csv" ? (
+        {!loading && (
           <>
-            Your file should contain the following columns:
-            <ul className="mb-1.5 list-disc [&>li]:ml-4">
-              <li>Movie ID</li>
-              <li>Watched (optional)</li>
-              <li>Favourite (optional)</li>
-            </ul>
-            The first line should contain the column names.
-            <input
-              id="file"
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="sr-only"
-            />
-            <label
-              htmlFor="file"
-              className={`${fileName ? "flex gap-2" : ""} relative mt-3 block w-full border-t border-neutral-800 py-3 text-center`}
-            >
-              <span className="flex-shrink-0 text-blue">
-                {!fileName ? "Choose file" : "Selected file:"}
-              </span>
-              {fileName && (
-                <span className="truncate">
-                  <File className="-mt-[0.2em] mr-0.5 inline-block size-[1em] flex-shrink-0" />
-                  {fileName}
-                </span>
-              )}
-            </label>
+            {importMethod === "csv" ? (
+              <>
+                Your file should contain the following columns:
+                <ul className="mb-1.5 list-disc [&>li]:ml-4">
+                  <li>Movie ID</li>
+                  <li>Watched (optional)</li>
+                  <li>Favourite (optional)</li>
+                </ul>
+                Ensure the first line includes column headers.
+                <input
+                  id="file"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="sr-only"
+                />
+                <label
+                  htmlFor="file"
+                  className={`${fileName ? "flex gap-2" : ""} relative mt-3 block w-full cursor-pointer border-t border-neutral-800 py-3 text-center`}
+                >
+                  <span className="flex-shrink-0 text-blue">
+                    {!fileName ? "Choose file" : "Selected file:"}
+                  </span>
+                  {fileName && (
+                    <span className="truncate">
+                      <File className="-mt-[0.2em] mr-0.5 inline-block size-[1em] flex-shrink-0" />
+                      {fileName}
+                    </span>
+                  )}
+                </label>
+              </>
+            ) : (
+              <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Enter movie IDs separated by commas. Example: 680, 11, 1726, 13"
+                className={`block min-h-32 w-full resize-y bg-neutral-900 pb-3 placeholder-neutral-500 outline-none`}
+              />
+            )}
           </>
-        ) : (
-          <textarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter movie IDs separated by commas"
-            className={`block min-h-32 w-full resize-y bg-neutral-900 pb-3 placeholder-neutral-500 outline-none`}
-          />
         )}
-        {(inputMethod === "textarea" && inputValue) ||
-        (inputMethod === "csv" && fileName) ? (
-          <button
-            onClick={handleImport}
-            className="relative w-full border-t border-neutral-800 py-3 text-blue"
+
+        {/* Import button and progress bar */}
+        {(importMethod === "textarea" && inputValue) ||
+        (importMethod === "csv" && fileName) ? (
+          <div
+            className={`relative w-full text-blue ${!loading ? "border-t border-neutral-800" : "cursor-wait"}`}
           >
             {loading ? (
               <>
-                <Spinner className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                &nbsp;
+                Importing: {progress || 0}/{totalIds || 0}
+                {/* <Spinner className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" /> &nbsp; */}
+                <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div
+                    className="absolute h-[100%] w-0 rounded-r-full bg-blue transition-all duration-300"
+                    style={{ width: `${(progress / totalIds) * 100}%` }}
+                  ></div>
+                </div>
+                <button onClick={cancelImport} className="w-full py-3 text-red">
+                  Cancel
+                </button>
               </>
             ) : (
-              "Import"
+              <>
+                <button
+                  onClick={handleImport}
+                  className={`w-full py-3 transition-opacity duration-150 ${importMethod === "csv" && fileData.length === 0 ? "opacity-50" : ""}`}
+                >
+                  Import
+                  {/* {importMethod === "csv" && fileData.length === 0 ? (
+                    <>
+                      <Spinner className="!absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                      &nbsp;
+                    </>
+                  ) : (
+                    "Import"
+                  )} */}
+                </button>
+              </>
             )}
-            &nbsp;
-          </button>
+          </div>
         ) : null}
       </div>
 
       {message && (
-        <>
-          <p className="mt-4" />
+        <p
+          className={`mt-4 flex items-center gap-2 px-4 ${message === "success" ? "rounded-xl font-medium" : ""}`}
+        >
           {message === "success" ? (
-            <span className="flex items-center gap-2">
-              <Check className="size-4 rounded-full border border-green p-0.5 text-green" />
+            <>
+              <Check
+                className={`size-4 rounded-full border-[1.5px] border-[currentColor] p-[2px] text-green`}
+                strokeWidth={4}
+              />
               Movies imported successfully!
-            </span>
+            </>
+          ) : message === "offline" ? (
+            <>
+              <WifiOff
+                className="size-4 shrink-0 text-orange"
+                strokeWidth={2}
+              />
+              You are currently offline. Please check your internet connection
+              to import movies.
+            </>
           ) : (
-            <span dangerouslySetInnerHTML={{ __html: message }} />
+            <>
+              <Info className="size-4" strokeWidth={2} />
+              {message}
+            </>
           )}
-        </>
+        </p>
       )}
+
       {error && (
-        <p className="mt-4" dangerouslySetInnerHTML={{ __html: error }} />
+        <div className="mt-4 px-4">
+          <p
+            className="select-text border-t border-neutral-800/75 py-4"
+            dangerouslySetInnerHTML={{ __html: error }}
+          />
+        </div>
       )}
-    </div>
+
+      {/* {loading && (
+        <div className="relative mt-4 h-8 w-full overflow-hidden rounded-full bg-neutral-900 dark:bg-neutral-900">
+          <div
+            className="h-8 w-0 bg-blue transition-all duration-300"
+            style={{ width: `${(progress / totalIds) * 100}%` }}
+          ></div>
+          <div className="absolute inset-0 grid place-items-center text-xs leading-none text-neutral-100/50">
+            <span>
+              {progress || 0}/{totalIds || 0}
+            </span>
+          </div>
+        </div>
+      )} */}
+    </>
   );
 }

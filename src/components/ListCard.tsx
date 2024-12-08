@@ -1,6 +1,7 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+
+import { motion } from "framer-motion";
 
 interface ListCardProps {
   title: string;
@@ -32,7 +33,7 @@ export function ListCard({
         initial={firstLoad ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className={`flex size-full flex-col justify-between rounded-2xl bg-neutral-900 p-3 pb-2`}
+        className={`flex size-full flex-col justify-between rounded-2xl bg-neutral-900 p-3 pb-2 active:bg-neutral-800/80 sm:hover:bg-neutral-800/80`}
       >
         <div className="mb-1.5 flex w-full items-center justify-between gap-4">
           <span

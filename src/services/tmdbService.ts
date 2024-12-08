@@ -31,3 +31,17 @@ export const getMovieById = async (id: string) => {
     return null;
   }
 };
+
+export const getMovieCredits = async (id: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/movie/${id}/credits`, {
+      params: {
+        api_key: API_KEY,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie credits:", error);
+    return null;
+  }
+};

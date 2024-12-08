@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSwipeable } from "react-swipeable";
+
 import { Plus, Minus, Eye } from "lucide-react";
 
 interface SwipableMovieProps {
@@ -86,7 +87,7 @@ export const SwipableMovie: React.FC<SwipableMovieProps> = ({
       setSwipeWidth(
         eventData.dir === "Right"
           ? Math.min(eventData.deltaX, limit / 2.5)
-          : Math.max(eventData.deltaX, -limit / 4),
+          : Math.max(eventData.deltaX, -limit / 4)
       );
       setSwipeDirection(eventData.dir.toLowerCase());
     },
@@ -96,13 +97,13 @@ export const SwipableMovie: React.FC<SwipableMovieProps> = ({
   return (
     <div
       {...handlers}
-      className={`-hover:bg-neutral-900 relative flex cursor-grab items-center gap-4 px-4 py-2 ${swipeWidth ? "bg-neutral-900/0" : ""}`}
+      className={`relative flex cursor-grab items-center gap-4 px-3 py-2 ${swipeWidth ? "bg-neutral-900/0" : ""}`}
       style={{ marginLeft: `${swipeWidth}px`, marginRight: `${-swipeWidth}px` }}
     >
       <div className="h-[3.75rem] w-10 flex-shrink-0 overflow-hidden rounded-md">
         {movie.poster_path ? (
           <img
-            src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+            src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
             alt="Movie Poster"
             className="block size-full object-cover"
           />

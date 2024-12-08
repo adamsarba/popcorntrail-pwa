@@ -26,6 +26,16 @@ export default {
         orange: "#ff9e0b",
       },
     },
+    container: {
+      center: true,
+      screens: {
+        sm: "64rem",
+        md: "64rem",
+        lg: "64rem",
+        xl: "64rem",
+        "2xl": "64rem",
+      },
+    },
   },
   plugins: [
     plugin(function ({ addVariant }) {
