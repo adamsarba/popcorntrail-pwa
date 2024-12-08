@@ -12,29 +12,55 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <meta name="theme-color" content="#000000" />
-    <link rel="apple-touch-icon" href="/img/icon-512.png" />
-    <link rel="icon" type="image/png" href="/img/icon-512.png" />
-    <link rel="icon" type="image/svg+xml" href="/img/favicon.svg" />
 
     <title>PopcornTrail - Movie Tracker</title>
     <meta name="apple-mobile-web-app-title" content="PopcornTrail" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
 
-    <link href="/noscript.css" rel="stylesheet" />
-    <noscript>
-      <h2>To use this application, please ensure JavaScript is enabled.</h2>
-      <p>
-        Please enable JavaScript or upgrade to a JavaScript capable browser.
-      </p>
-    </noscript>
     <style>
       body {
         background: #000;
       }
+      .splash-screen {
+        color: white;
+        display: grid;
+        place-items: center;
+        height: 100svh;
+        background-image: url("/img/icon-100.png");
+        background-size: 50px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
     </style>
+    <meta name="theme-color" content="#000000" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/img/favicon.svg" /> -->
+
+    <link rel="icon" sizes="16x16" type="image/png" href="/img/icon-16.png" />
+    <link rel="icon" sizes="32x32" type="image/png" href="/img/icon-32.png" />
+    <link rel="icon" sizes="72x72" type="image/png" href="/img/icon-72.png" />
+    <link rel="icon" sizes="96x96" type="image/png" href="/img/icon-96.png" />
+    <!-- prettier-ignore -->
+    <link rel="icon" sizes="512x512" type="image/png" href="/img/icon-512.png"/>
+    <!-- <link rel="apple-touch-icon" type="image/png" sizes="57x57" href="/img/icon-57.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="/img/icon-60.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="72x72" href="/img/icon-72.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="/img/icon-76.png"> -->
+    <link rel="apple-touch-icon" href="/img/icon-512.png" />
+    <meta name="msapplication-square70x70logo" content="/img/icon-70.png" />
+  </head>
+  <body>
+    <div id="root">
+      <div class="splash-screen"></div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+
+    <noscript>
+      <h2>To use this application, please ensure JavaScript is enabled.</h2>
+      <p>
+        Our app relies on JavaScript to function properly, and without it, you
+        won't be able to use it. Please enable JavaScript or upgrade to a
+        JavaScript capable browser.
+      </p>
+      <link href="/noscript.css" rel="stylesheet" />
+    </noscript>
   </body>
 </html>
