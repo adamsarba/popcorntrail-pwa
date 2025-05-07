@@ -64,3 +64,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [TMDB API](https://developer.themoviedb.org/docs/getting-started) for movie data.
 - [React](https://reactjs.org/) for building the user interface.
 - [Tailwind CSS](https://tailwindcss.com/) for styling.
+
+## License
+
+This project is not licensed for reuse.  
+All rights reserved © Adam Sarba.  
+Do not copy, modify, or distribute any part of the code without written permission.
